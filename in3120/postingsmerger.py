@@ -25,7 +25,17 @@ class PostingsMerger:
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
         """
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        posting1 = next(p1, None)
+        posting2 = next(p2, None)
+        while posting1 and posting2:
+            if posting1.document_id == posting2.document_id:
+                yield Posting(posting1.document_id, min(posting1.term_frequency, posting2.term_frequency))
+                posting1 = next(p1, None)
+                posting2 = next(p2, None)
+            elif posting1.document_id < posting2.document_id:
+                posting1 = next(p1, None)
+            else:
+                posting2 = next(p2, None)
 
     @staticmethod
     def union(p1: Iterator[Posting], p2: Iterator[Posting]) -> Iterator[Posting]:
@@ -36,4 +46,16 @@ class PostingsMerger:
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
         """
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        posting1 = next(p1, None)
+        posting2 = next(p2, None)
+        while posting1 or posting2:
+            if posting1 and posting2 and posting1.document_id == posting2.document_id:
+                yield Posting(posting1.document_id, max(posting1.term_frequency, posting2.term_frequency))
+                posting1 = next(p1, None)
+                posting2 = next(p2, None)
+            elif (posting1 and posting2 and posting1.document_id < posting2.document_id) or (posting1 and not posting2):
+                yield posting1
+                posting1 = next(p1, None)
+            else:
+                yield posting2
+                posting2 = next(p2, None)

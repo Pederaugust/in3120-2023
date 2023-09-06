@@ -79,13 +79,38 @@ class InMemoryInvertedIndex(InvertedIndex):
         return str({term: self.__posting_lists[term_id] for (term, term_id) in self.__dictionary})
 
     def __build_index(self, fields: Iterable[str], compressed: bool) -> None:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        token_sequence = []
+        for document in self.__corpus:
+            for field in fields:
+                for term in self.get_terms(document[field]):
+                    token_sequence.append(
+                        (term,  document.document_id))
+
+        sorted_token_sequence = sorted(token_sequence, key=lambda x: x[0])
+        postings = {}
+        for term, document_id in sorted_token_sequence:
+            if term not in postings:
+                postings[term] = []
+            postings[term].append(document_id)
+
+        pl = InMemoryPostingList()
+        for term, document_ids in postings.items():
+            self.__dictionary.add_if_absent(term)
+            for document_id, count in Counter(document_ids).items():
+                pl.append_posting(Posting(document_id, count))
+            self.__posting_lists.append(pl)
+            pl = InMemoryPostingList()
 
     def get_terms(self, buffer: str) -> Iterator[str]:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        return [self.__normalizer.normalize(token) for token in self.__tokenizer.strings(buffer)]
 
     def get_postings_iterator(self, term: str) -> Iterator[Posting]:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        term_id = self.__dictionary.get_term_id(term)
+        if term_id is None:
+            return iter([])
+        return self.__posting_lists[term_id].get_iterator()
 
     def get_document_frequency(self, term: str) -> int:
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+        if self.__dictionary.get_term_id(term) is None:
+            return 0
+        return self.__posting_lists[self.__dictionary.get_term_id(term)].get_length()
