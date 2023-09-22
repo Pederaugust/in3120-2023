@@ -56,7 +56,8 @@ class SuffixArray:
         Produces a normalized version of the given string. Both queries and documents need to be
         identically processed for lookups to succeed.
         """
-        return self.__normalizer.normalize(buffer)
+
+        return self.__normalizer.normalize(self.__normalizer.canonicalize(buffer))
 
     def __binary_search(self, needle: str) -> int:
         """
@@ -101,30 +102,30 @@ class SuffixArray:
         "document" (Document).
         """
         normalized_query = self.__normalize(query)
-        print("Searching for", normalized_query)
 
         idx_of_needle = self.__binary_search(
             normalized_query)  # O(log n)
-        print("Found at index", idx_of_needle)
 
-        # So now we have the first suffix that matches the query
-        # We need to then iterate until we find the first suffix that doesn't match the query
+        suffix = self.__suffix_of_doc(self.__suffixes[idx_of_needle])
+
         doc_dict = {}
-        while True:  # O(n)
-            suffix_data = self.__suffixes[idx_of_needle]
-            suffix = self.__suffix_of_doc(suffix_data)
-            tokens = list(self.__tokenizer.tokens(suffix))
+        while suffix.startswith(normalized_query):
+            doc_id = self.__doc_id_from_suffix(self.__suffixes[idx_of_needle])
 
-            if normalized_query == tokens[0]:  # i.e. suffix starts with
-                if doc_dict[self.__doc_id_from_suffix(suffix_data)]:
-                    doc_dict[self.__doc_id_from_suffix(suffix_data)] += 1
-                else:
-                    doc_dict[self.__doc_id_from_suffix(suffix_data)] = 1
-                idx_of_needle += 1
+            if doc_id in doc_dict:
+                doc_dict[doc_id] += 1
             else:
+                doc_dict[doc_id] = 1
+
+            idx_of_needle += 1
+
+            if idx_of_needle == len(self.__suffixes):
                 break
-        results = [{"score": v, "document": self.__corpus[k]}
-                   for k, v in doc_dict.items()]
+
+            suffix = self.__suffix_of_doc(self.__suffixes[idx_of_needle])
+
         if "hit_count" in options:
-            results = results[:options["hit_count"]]
-        return results
+            return ({"score": v, "document": self.__corpus[k]}
+                    for k, v in doc_dict.items()[:options["hit_count"]])
+        else:
+            return ({"score": v, "document": self.__corpus[k]} for k, v in doc_dict.items())

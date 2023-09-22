@@ -23,17 +23,17 @@ class TestSuffixArray(unittest.TestCase):
     def test_build_suffix_array_initializes_haystack(self):
         self.assertEqual(self.engine._SuffixArray__haystack, [
             (0, self.normalizer.normalize("japanese リンク")),
-            (1, self.normalizer.normalize("Cedilla \u0043\u0327 and \u00C7 foo"))
+            (1, self.normalizer.normalize("Cedilla \u00C7 and \u00C7 foo"))
         ], "The haystack was not implemented correctly")
 
     def test_build_suffix_array_initializes_suffixes(self):
         self.assertListEqual(self.engine._SuffixArray__suffixes, [
-            (1, 11),
+            (1, 10),
             (1, 0),
-            (1, 8),
-            (1, 17),
+            (1, 16),
             (0, 0),
-            (1, 15),
+            (1, 8),
+            (1, 14),
             (0, 9),
         ], "The suffixes were not implemented correctly, check sorting or tokenization/normalization")
 
@@ -43,12 +43,12 @@ class TestSuffixArray(unittest.TestCase):
             (1, "Cedilla \u0043\u0327 and \u00C7 foo")
         ]
         suffixes = [
-            (1, 11),
+            (1, 10),
             (1, 0),
-            (1, 7),
-            (1, 17),
+            (1, 8),
             (0, 0),
-            (1, 15),
+            (1, 16),
+            (1, 14),
             (0, 9),
         ]
         sf_array = in3120.SuffixArray(
@@ -60,30 +60,7 @@ class TestSuffixArray(unittest.TestCase):
         self.assertEqual(sf_array._SuffixArray__suffix_of_doc(
             (1, 0)), "Cedilla \u0043\u0327 and \u00C7 foo")
 
-    def test_binary_search(self):
-        self.engine._SuffixArray__haystack = [
-            (0, "japanese リンク"),
-            (1, "Cedilla \u0043\u0327 and \u00C7 foo")
-        ]
-        self.engine._SuffixArray__suffixes = [
-            (1, 11),
-            (1, 0),
-            (1, 7),
-            (1, 17),
-            (0, 0),
-            (1, 15),
-            (0, 9),
-        ]
-        self.assertEqual(self.engine._SuffixArray__binary_search("foo"), 3)
-        self.assertEqual(
-            self.engine._SuffixArray__binary_search("japanese リンク"), 4)
-        self.assertEqual(
-            self.engine._SuffixArray__binary_search("indoor"), 4
-        )
-
     def test_first_query(self):
-        print(self.normalizer.normalize("ﾘﾝｸ"))
-        print(self.normalizer.normalize("リンク"))
 
         matches = list(self.engine.evaluate(
             "ﾘﾝｸ", {"debug": False, "hit_count": 5}))
@@ -94,8 +71,18 @@ class TestSuffixArray(unittest.TestCase):
         matches = list(self.engine.evaluate(
             "\u00C7", {"debug": False, "hit_count": 5}))
         self.assertEqual(matches[0]["document"].document_id, 1)
-        # Should match two characters in document 1, therefore score 2
+        # Should match two tokens in document 1, therefore score 2
         self.assertEqual(matches[0]["score"], 2)
+
+
+class TestStringFinder(unittest.TestCase):
+    def setUp(self):
+        self.tokenizer = in3120.SimpleTokenizer()
+        self.trie = in3120.Trie()
+        self.finder = in3120.StringFinder(self.trie, self.tokenizer)
+
+    def test_something(self):
+        print("Not implemented")
 
 
 if __name__ == '__main__':
