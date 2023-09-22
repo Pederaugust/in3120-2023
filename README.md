@@ -107,10 +107,10 @@ All your implementations should be reasonably efficient, complexity-wise. E.g., 
 
 When turning in your solutions, please note the following delivery constraints that enable partial automation on the receiver side and that make life easier for the teaching assistants:
 
-* Submit your solution using [Devilry](https://devilry.ifi.uio.no/). No emails with attachments, please.
-* Your submission should be an archive in either `*.zip`, `*.tar` or `*.tar.gz` format. No other archive formats, please.
 * Your implementation should only make use of [standard Python libraries](https://docs.python.org/3/library/index.html), unless explicitly noted otherwise. No imports of non-standard libraries, please, unless otherwise noted.
 * Your implementation should be fully contained in the supplied `*.py` files. Don't introduce any new files, please.
+* Submit your solution using [Devilry](https://devilry.ifi.uio.no/). No emails with attachments, please.
+* If you want to archive your submission, you are limited to *.zip, *.tar and *.tar.gz format. No other archive formats, please.
 * The files you submit for your implementation should only be the `*.py` files where there are missing implementations per the assignment. Don't submit untouched files from this repository, please, and don't spread your implementation across other files.
 * Your implementation should adhere to the APIs of the abstract base classes, without modifications.
 

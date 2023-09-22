@@ -1,6 +1,6 @@
 # Assignment D-1
 
-**Deadline:** TBA
+**Deadline:** 2023-10-27
 
 The purpose of this assignment is twofold:
 

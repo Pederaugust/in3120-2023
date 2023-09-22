@@ -1,6 +1,6 @@
 # Assignment A
 
-**Deadline:** TBA
+**Deadline:** 2023-09-15
 
 The purpose of this assignment is to build a simple in-memory inverted index and show how to merge posting lists.
 
@@ -46,7 +46,7 @@ Ran 7 tests in 1.798s
 
 OK
 
->python3 repl.py a
+>python3 repl.py a-1
 Building inverted index from Cranfield corpus...
 Enter one or more index terms and inspect their posting lists.
 Enter '!' to exit.

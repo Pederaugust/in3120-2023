@@ -1,11 +1,11 @@
 # Science Fair
 
-**Deadline for group self-assignment:** TBA\
-**Deadline for topic selection:** TBA
+**Deadline for group self-assignment:** 2023-10-18\
+**Deadline for topic selection:** 2023-11-01
 
 For IN4120 students the course will end the semester with a science fair. Participation in the science fair is mandatory for IN4120 students, and distinguishes IN4120 from IN3120. You don’t get a grade but will have to participate and pass to be allowed to take the final exam.
 
-Students are divided into groups of 2 people. You can self-organize and find a partner, or you can have a partner randomly assigned. Please let me know by the abovementioned deadline if you have self-organized and with whom, otherwise I will apply my mad matchmaking skillz and pair you up with a partner.
+Students are divided into groups of 2 people. You can self-organize and find a partner, or you can have a partner randomly assigned. Please let me know by the abovementioned deadline if you have self-organized and with whom, otherwise I will apply my mad matchmaking skillz and pair you up with a partner. (If you want to form a 1- or 3-person group for some reason, argue your case and let me know. I can make exceptions to the rule.)
 
 Each group should prepare a 10-15 minute long presentation on a selected topic. The presentation will be given to the rest of the class including IN3120 students. Groups can self-organize and pick their own topic, under the following conditions:
 
