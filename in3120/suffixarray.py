@@ -57,7 +57,8 @@ class SuffixArray:
         Produces a normalized version of the given string. Both queries and documents need to be
         identically processed for lookups to succeed.
         """
-        return self.__normalizer.normalize(buffer)
+
+        return self.__normalizer.normalize(self.__normalizer.canonicalize(buffer))
 
     def __binary_search(self, needle: str) -> int:
         """
@@ -102,21 +103,30 @@ class SuffixArray:
         "document" (Document).
         """
         normalized_query = self.__normalize(query)
-        print("Searching for", normalized_query)
 
         idx_of_needle = self.__binary_search(
             normalized_query)  # O(log n)
-        print("Found at index", idx_of_needle)
 
-        # We have a sieve class that we will use to keep track of the best matches
-        sieve = Sieve(options["hit_count"])  # Methods sift, winners
+        suffix = self.__suffix_of_doc(self.__suffixes[idx_of_needle])
 
-        # We will now iterate over the suffixes and check if the normalized query is a prefix of the suffix
-        # If it is, we will add it to the sieve
-        for suffix in self.__suffixes[idx_of_needle:]:  # O(n)
-            if not self.__suffix_of_doc(suffix).startswith(normalized_query):
+        doc_dict = {}
+        while suffix.startswith(normalized_query):
+            doc_id = self.__doc_id_from_suffix(self.__suffixes[idx_of_needle])
+
+            if doc_id in doc_dict:
+                doc_dict[doc_id] += 1
+            else:
+                doc_dict[doc_id] = 1
+
+            idx_of_needle += 1
+
+            if idx_of_needle == len(self.__suffixes):
                 break
-            sieve.sift(self.__score(suffix),
-                       self.__haystack[self.__haystack_index(suffix)][0])
 
-        return sieve.winners()
+            suffix = self.__suffix_of_doc(self.__suffixes[idx_of_needle])
+
+        if "hit_count" in options:
+            return ({"score": v, "document": self.__corpus[k]}
+                    for k, v in doc_dict.items()[:options["hit_count"]])
+        else:
+            return ({"score": v, "document": self.__corpus[k]} for k, v in doc_dict.items())
