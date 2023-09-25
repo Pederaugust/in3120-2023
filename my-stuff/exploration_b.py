@@ -98,5 +98,19 @@ class TestSuffixArray(unittest.TestCase):
         self.assertEqual(matches[0]["score"], 2)
 
 
+class TestPrefixSearch(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tokenizer = in3120.SimpleTokenizer()
+        self.trie = in3120.Trie()
+        self.trie.add(["romerike", "apple computer", "norsk", "norsk ørret", "sverige",
+                       "ørret", "banan", "a", "a b"], self.tokenizer)
+
+    def test_scan_matches(self):
+        finder = in3120.StringFinder(self.trie, self.tokenizer)
+        matches = list(finder.scan(
+            "en norsk     ørret fra romerike likte abba fra sverige"))
+        print(matches)
+
+
 if __name__ == '__main__':
     unittest.main()

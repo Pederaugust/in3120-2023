@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from typing import Iterator, Dict, Any 
+from typing import Iterator, Dict, Any
 from .tokenizer import Tokenizer
 from .trie import Trie
 
@@ -21,7 +21,7 @@ class StringFinder:
     """
 
     def __init__(self, trie: Trie, tokenizer: Tokenizer):
-        self.__trie = trie
+        self.__trie = trie  # Methods: add, consume, is_final
         self.__tokenizer = tokenizer
 
     def scan(self, buffer: str) -> Iterator[Dict[str, Any]]:
@@ -36,4 +36,10 @@ class StringFinder:
         support for leftmost-longest matching (instead of reporting all matches), and support for lemmatization
         or similar linguistic variations.
         """
-        raise NotImplementedError("You need to implement this as part of the assignment.")
+
+        for (token, rng) in self.__tokenizer.tokens(buffer):  # token = string, rng = tuple
+            # First node might be a match or not
+            trie = self.__trie.consume(token)
+            if trie is not None and trie.is_final():
+                if trie.keys() == [""]:
+                    yield {"match": token, "range": rng}

@@ -6,6 +6,7 @@ import math
 from .corpus import Corpus
 from .normalizer import Normalizer
 from .tokenizer import Tokenizer
+from .sieve import Sieve
 
 
 class SuffixArray:
@@ -107,24 +108,15 @@ class SuffixArray:
             normalized_query)  # O(log n)
         print("Found at index", idx_of_needle)
 
-        # So now we have the first suffix that matches the query
-        # We need to then iterate until we find the first suffix that doesn't match the query
-        doc_dict = {}
-        while True:  # O(n)
-            suffix_data = self.__suffixes[idx_of_needle]
-            suffix = self.__suffix_of_doc(suffix_data)
-            tokens = list(self.__tokenizer.tokens(suffix))
+        # We have a sieve class that we will use to keep track of the best matches
+        sieve = Sieve(options["hit_count"])  # Methods sift, winners
 
-            if normalized_query == tokens[0]:  # i.e. suffix starts with
-                if doc_dict[self.__doc_id_from_suffix(suffix_data)]:
-                    doc_dict[self.__doc_id_from_suffix(suffix_data)] += 1
-                else:
-                    doc_dict[self.__doc_id_from_suffix(suffix_data)] = 1
-                idx_of_needle += 1
-            else:
+        # We will now iterate over the suffixes and check if the normalized query is a prefix of the suffix
+        # If it is, we will add it to the sieve
+        for suffix in self.__suffixes[idx_of_needle:]:  # O(n)
+            if not self.__suffix_of_doc(suffix).startswith(normalized_query):
                 break
-        results = [{"score": v, "document": self.__corpus[k]}
-                   for k, v in doc_dict.items()]
-        if "hit_count" in options:
-            results = results[:options["hit_count"]]
-        return results
+            sieve.sift(self.__score(suffix),
+                       self.__haystack[self.__haystack_index(suffix)][0])
+
+        return sieve.winners()
