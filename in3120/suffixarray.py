@@ -57,8 +57,10 @@ class SuffixArray:
         Produces a normalized version of the given string. Both queries and documents need to be
         identically processed for lookups to succeed.
         """
+        nm = self.__normalizer.canonicalize(
+            self.__normalizer.normalize(buffer))
 
-        return self.__normalizer.normalize(self.__normalizer.canonicalize(buffer))
+        return " ".join(self.__tokenizer.strings(nm))
 
     def __binary_search(self, needle: str) -> int:
         """
@@ -81,7 +83,7 @@ class SuffixArray:
                 right = middle - 1
             else:
                 return middle
-        return middle
+        return left  # If not found, should have been inserted here.
 
     def __doc_id_from_suffix(self, suffix: Tuple[int, int]) -> int:
         return self.__haystack[self.__haystack_index(suffix)][0]
@@ -103,30 +105,36 @@ class SuffixArray:
         "document" (Document).
         """
         normalized_query = self.__normalize(query)
-
+        if len(normalized_query) == 0:
+            return []
         idx_of_needle = self.__binary_search(
             normalized_query)  # O(log n)
-
-        suffix = self.__suffix_of_doc(self.__suffixes[idx_of_needle])
-
+        if idx_of_needle >= len(self.__suffixes):
+            return []
+        suffix_data = self.__suffixes[idx_of_needle]
+        suffix = self.__suffix_of_doc(suffix_data)
         doc_dict = {}
-        while suffix.startswith(normalized_query):
-            doc_id = self.__doc_id_from_suffix(self.__suffixes[idx_of_needle])
 
-            if doc_id in doc_dict:
+        while suffix.startswith(normalized_query):
+            doc_id = self.__doc_id_from_suffix(suffix_data)
+            if doc_id in doc_dict.keys():
                 doc_dict[doc_id] += 1
             else:
                 doc_dict[doc_id] = 1
 
             idx_of_needle += 1
-
-            if idx_of_needle == len(self.__suffixes):
+            if idx_of_needle >= len(self.__suffixes):
                 break
+            suffix_data = self.__suffixes[idx_of_needle]
+            suffix = self.__suffix_of_doc(suffix_data)
+        if "hit_count" in options.keys():
+            sieve = Sieve(options["hit_count"])
 
-            suffix = self.__suffix_of_doc(self.__suffixes[idx_of_needle])
+            for doc_id, score in doc_dict.items():
+                sieve.sift(score, doc_id)
 
-        if "hit_count" in options:
-            return ({"score": v, "document": self.__corpus[k]}
-                    for k, v in doc_dict.items()[:options["hit_count"]])
+            winners = sieve.winners()
         else:
-            return ({"score": v, "document": self.__corpus[k]} for k, v in doc_dict.items())
+            winners = ((score, doc_id) for doc_id, score in doc_dict.items())
+
+        return ({"score": score, "document": self.__corpus[doc_id]} for (score, doc_id) in winners)

@@ -37,9 +37,33 @@ class StringFinder:
         or similar linguistic variations.
         """
 
-        for (token, rng) in self.__tokenizer.tokens(buffer):  # token = string, rng = tuple
-            # First node might be a match or not
+        tokens = self.__tokenizer.tokens(buffer)
+        states: list((Trie, int)) = []
+
+        for (token, rng) in tokens:
+            for state in states:
+                trie = state[0]
+                found = False
+                for c in token:
+                    trie = trie.consume(c)
+                    if trie is None:
+                        break
+                    if trie.is_final():
+                        found = True
+                        yield {"match": " ".join(self.__tokenizer.strings(buffer[state[1]:rng[1]])), "range": (state[1], rng[1])}
+
+                if trie is not None:
+                    trie = trie.consume(" ")
+                    if trie is not None:
+                        states.append((trie, state[1]))
+
+                if not found:
+                    states.remove(state)
+
             trie = self.__trie.consume(token)
-            if trie is not None and trie.is_final():
-                if trie.keys() == [""]:
+            if trie is not None:
+                if trie.is_final():
                     yield {"match": token, "range": rng}
+                trie = trie.consume(" ")
+                if trie is not None:
+                    states.append((trie, rng[0]))

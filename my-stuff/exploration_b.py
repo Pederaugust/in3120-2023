@@ -74,6 +74,15 @@ class TestSuffixArray(unittest.TestCase):
         # Should match two tokens in document 1, therefore score 2
         self.assertEqual(matches[0]["score"], 2)
 
+    def test_third_query(self):
+        corpus = in3120.InMemoryCorpus("../data/cran.xml")
+        options = {"debug": False, "hit_count": 5}
+        self.engine = in3120.SuffixArray(
+            corpus, ["body"], self.normalizer, self.tokenizer)
+
+        matches = list(self.engine.evaluate("Of  A", options))
+        # , [946], 10)
+
 
 class TestPrefixSearch(unittest.TestCase):
     def setUp(self) -> None:

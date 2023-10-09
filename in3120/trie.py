@@ -4,6 +4,7 @@
 from __future__ import annotations
 from typing import Optional, Iterable
 from .tokenizer import Tokenizer
+import json
 
 
 class Trie:
@@ -24,6 +25,9 @@ class Trie:
 
     def __repr__(self):
         return repr(self.__children)
+
+    def __str__(self):
+        return json.dumps(self.__children, indent=4)
 
     def __add(self, string: str) -> None:
         assert 0 < len(string)
